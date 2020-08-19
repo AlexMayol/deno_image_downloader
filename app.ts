@@ -1,17 +1,26 @@
-// const res = await fetch("https://raw.githubusercontent.com/AlexMayol/midn1ght-recipes/master/style.css");
+import { parse } from "https://deno.land/std/flags/mod.ts";
+import { imagesList } from "./images.ts";
 
-import { images } from "./images.ts";
+let images: string[] = parse(Deno.args).url
+  ? [parse(Deno.args).url]
+  : imagesList;
 
-let res = null;
-let body = null;
+const getName = (str: string): string => {
+  if (str.includes("?")) {
+    str = str.split("?")[0];
+  }
 
-let name = null;
+  let len: number = str.split("/").length;
+  let name = str.split("/")[len - 1];
+  return name;
+};
+
+let imageData,
+  body = null;
 
 for (let img of images) {
   if (img.includes(".mp4")) continue;
-
-  name = "test";
-  res = await fetch(img);
-  body = new Uint8Array(await res.arrayBuffer());
-  await Deno.writeFile(`./images/${name}.jpg`, body);
+  imageData = await fetch(img);
+  body = new Uint8Array(await imageData.arrayBuffer());
+  await Deno.writeFile(`./images/${getName(img)}`, body);
 }
